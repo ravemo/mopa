@@ -325,6 +325,7 @@ void evalSingleToken(Context *ctx, Token tok, u32 pc) {
 			PUSH(len);
 		} break;
 		case TokString: {
+			// TODO: Parse escape characters like '\n'
 			const char *ptr = ctx->code.ptr + tok.pos + 1;
 			u32 len = tok.len - 2;
 			PUSH(ptr);
@@ -598,8 +599,9 @@ int main(int argc, char** argv) {
 		.stack_bot = malloc(1000000000), // 1 GB
 	};
 	ctx.stack = ctx.stack_bot;
-	if(argc == 1) {
-		ctx.code = span("\"Hello sailor!\n\" print");
+	if(argc <= 1) {
+		fprintf(stderr, "No source file provided.\n");
+		exit(1);
 	} else {
 		ctx.code = span(readFileContents(argv[1]));
 	}
