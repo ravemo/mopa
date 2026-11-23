@@ -267,7 +267,7 @@ u32 getTokenCountRequiredForStackCount(Context *ctx, u32 stack_count, u32 pos) {
 }
 
 #define PUSH(x) do { \
-	memcpy(ctx->stack, &x, sizeof(x)); \
+	memcpy(ctx->stack, &(x), sizeof(x)); \
 	ctx->stack += sizeof(x); \
 } while(0);
 
@@ -286,6 +286,23 @@ char* printStack(Context *ctx) {
 	}
 	len += sprintf(debug_buf+len, "]");
 	return debug_buf;
+}
+
+char readEscapedChar(const char *ptr, u32 *pos, u32 len) {
+	char c = ptr[*pos];
+	for(; *pos < len; ++*pos) {
+ 	// TODO: Support all escape sequences
+		if(*pos < len-1 && c == '\\') {
+			++*pos;
+			switch(ptr[*pos]) {
+				case 'n': c = '\n'; break;
+				case '\\': c = '\\'; break;
+				default: todo();
+			}
+		} else break;
+	}
+	++*pos;
+	return c;
 }
 
 void evalSingleToken(Context *ctx, Token tok, u32 pc) {
@@ -325,9 +342,16 @@ void evalSingleToken(Context *ctx, Token tok, u32 pc) {
 			PUSH(len);
 		} break;
 		case TokString: {
-			// TODO: Parse escape characters like '\n'
-			const char *ptr = ctx->code.ptr + tok.pos + 1;
+			// TODO: pre-allocate all memory instead of appending in a loop
+			Array(char) unescaped_string = {0};
 			u32 len = tok.len - 2;
+			u32 j = 0;
+			while(j < len) {
+				char c = readEscapedChar(ctx->code.ptr + tok.pos + 1, &j, len);
+				append(&unescaped_string, ctx->gpa, c);
+			}
+			len = j;
+			char *ptr = unescaped_string.ptr;
 			PUSH(ptr);
 			PUSH(len);
 		} break;
@@ -472,17 +496,8 @@ void pushWord(Codegen *cg, u32 value) {
 }
 
 void writeBytes(char **data, const char *ptr, u32 len) {
-	for (u32 i = 0; i < len; ++i) {
-		char c = ptr[i];
- 	// TODO: Support all escape sequences
-		if(i < len-1 && c == '\\') {
-			switch(ptr[i+1]) {
-				case 'n': c = '\n'; break;
-				case '\\': c = '\\'; break;
-				default: todo();
-			}
-			++i;
-		}
+	for (u32 i = 0; i < len;) {
+		char c = readEscapedChar(ptr, &i, len);
 		*data += sprintf(*data, "b %d, ", c);
 	}
 	*data += sprintf(*data, "b 0");
@@ -595,7 +610,7 @@ const char* compile(Program program, StringView code, TypecheckInfo tc, RangeArr
 int main(int argc, char** argv) {
 	leak = initArena();
 	Context ctx = {
-		.gpa = initArena(),
+		.gpa = c_gpa,
 		.stack_bot = malloc(1000000000), // 1 GB
 	};
 	ctx.stack = ctx.stack_bot;
@@ -620,6 +635,5 @@ int main(int argc, char** argv) {
 	//	replaceSegments(&p, ct_values, compile_segments);
 	//	mergeSegments(tmp, &removed_segments, compile_segments);
 	//}
-	deinitArena(ctx.gpa);
 	return 0;
 }
