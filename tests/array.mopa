@@ -1,0 +1,8 @@
+{ i32 : 4 2 6 9 1 3 }
+u32 : // TODO: Support type inference
+0 [] print_i32 drop drop
+1 [] print_i32 drop drop
+2 [] print_i32 drop drop
+3 [] print_i32 drop drop
+4 [] print_i32 drop drop
+5 [] print_i32 drop drop

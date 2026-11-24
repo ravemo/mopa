@@ -1,0 +1,5 @@
+u32 : 3 9 5 7
+drop // drops 7
+drop // drops 5
+drop // drops 9
+drop // drops 3

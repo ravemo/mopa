@@ -74,7 +74,7 @@ int buildMain() {
 	cmd[cmd_len++] = "-Wextra";
 	cmd[cmd_len++] = "-Werror";
 	cmd[cmd_len++] = "-ftabstop=1";
-	cmd[cmd_len++] = "-g";
+	cmd[cmd_len++] = "-ggdb3";
 	cmd[cmd_len++] = "-O0";
 	cmd[cmd_len++] = "-fno-omit-frame-pointer";
 	DIR* cwd = opendir("src/");
