@@ -1,0 +1,11 @@
+Remove interpretation code
+Use the custom IR for compile-time execution
+Make a qbe-like IR
+Make this language compilable too (last level only)
+Make an asteroids game on this language
+Only perform compile-time execution after typechecking entire program to cleanly separate all compile-time levels (would this even be possible? if not, try to create a feature that would allow for separation of modules or something. Make it as minimal as possible to allow for the separation of levels)
+Implement automated testing
+Remove print and print_i32 function, use print_stack instead
+Implement runtime print_stack function
+Implement extern function definition with libffi
+>Implement struct declaration
